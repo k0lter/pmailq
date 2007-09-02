@@ -1,0 +1,190 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# This program is free software. It comes without any warranty, to
+# the extent permitted by applicable law. You can redistribute it
+# and/or modify it under the terms of the Do What The Fuck You Want
+# To Public License, Version 2, as published by Sam Hocevar. See
+# http://sam.zoy.org/wtfpl/COPYING for more details.
+
+
+_NAME = 'pmailq'
+_HELP = "[OPTIONS] [ show | showcsv | del ]"
+_DESC = "%s postfix mail queue manager" % _NAME
+_VERSION = '0.1'
+_AUTHOR = 'Emmanuel Bouthenot <kolter@openics.org>'
+
+from optparse import OptionParser, OptionGroup # needs python >= 2.3
+import sys, popen2
+
+class mailqueue:
+
+    def __init__(self):
+        self.mailqueue = []
+        self.filters = {
+            'email' : None,
+            'lowsize' : 0,
+            'upsize' : 0,
+            'active' : False,
+            'hold' : False
+            }
+        self.parse()
+
+
+    def add_filter(self, key, value):
+        self.filters[key] = value
+    
+
+    def parse(self):
+        
+        proc = popen2.Popen3("postqueue -p", True)    
+        
+        p_ret = proc.wait()
+        if p_ret != 0:
+            print "ERROR (%d) !!!:" % p_ret
+            print "".join(proc.childerr.readline())
+            return None
+
+        # checking empty mail queue
+        buffer = proc.fromchild.readlines()
+        if len(buffer)>0 and buffer[0].strip() == "Mail queue is empty":
+            print buffer[0].strip()
+            return None
+        
+        # skip first and last line
+        buffer = "".join(buffer[1:-1]).strip()
+        
+        for block in buffer.split("\n\n"):
+            lines = block.split("\n")
+
+            headers = lines[0].split(' ')
+            # squeeze repeated spaces
+            while '' in headers:
+                headers.remove('')
+        
+            queue = []
+            dest = []
+            info = ""
+            for expl in lines[1:]:
+                expl = expl.strip()
+        
+                if expl.startswith("(") and expl.endswith(")"):
+                    if info == "":
+                        info = expl[1:len(expl)-1]
+            
+                    if dest != []:
+                        queue.append({ "info" : info , "dest" : dest })
+                        dest = []
+                        info = expl[1:len(expl)-1]                
+                else:
+                    dest.append(expl.lower())
+
+            if dest != []:
+                queue.append({ "info" : info , "dest" : dest })
+        
+            self.mailqueue.append({
+                "id" : headers[0].rstrip("*!"),
+                "active" : headers[0].endswith("*"),
+                "hold" : headers[0].endswith("!"),
+                "size" : headers[1],
+                "date" : " ".join(headers[2:5]),
+                "queue" : queue
+                })
+
+
+    def check(self, size, active, hold, dest):
+        if self.filters['email'] != None and self.filters['email'].lower() not in dest:
+            return False
+        if self.filters['active'] and not active:
+            return False
+        if self.filters['hold'] and not hold:
+            return False
+        if self.filters['lowsize'] != 0 and int(size) > self.filters['lowsize']:
+            return False
+        if self.filters['upsize'] != 0 and int(size) < self.filters['upsize']:
+            return False
+
+        return True
+
+
+    def show(self):
+        for m in self.mailqueue:
+            out = "%s\n" % m['id'] 
+            out += "  -date: %s\n" % m['date']
+            out += "  -size: %s\n" % m['size']
+            out += "  -active: %s\n" % str(m['active'])
+            out += "  -hold: %s\n" % str(m['hold'])
+            out += "  -to:\n"
+            to = []
+            for n in m['queue']:
+                to += n['dest']
+                out += "    + %s : [%s]\n" % (",".join(n['dest']), n['info'])
+
+            if self.check(m['size'], m['active'], m['hold'], to):
+                print out
+
+        
+    def showcsv(self):
+        for m in self.mailqueue:
+            e = []
+            for n in m['queue']:
+                for o in n['dest']:
+                    e.append(o)
+                if self.check(m['size'], m['active'], m['hold'], e):
+                    print "%s|%s|%s|%d|%d|%s" % (m['id'], m['date'], m['size'], int(m['active']), int(m['hold']),  ",".join(n['dest']))
+
+
+    def delete(self):
+        for m in self.mailqueue:
+            e = []
+            for n in m['queue']:
+                for o in n['dest']:
+                    e.append(o)
+                if self.check(m['size'], m['active'], m['hold'], e):
+                    proc = popen2.Popen3("postsuper -d %s" % m['id'], True)
+                    p_ret = proc.wait()
+                    if p_ret != 0:
+                        print "deleting %s [FAILED] (%s)" % (m['id'], "".join(proc.childerr.readlines()).strip())
+                    else:
+                        print "deleting %s [OK]" % m['id']
+
+def main():
+    usage = "%prog " + _HELP
+    desc = _DESC
+    parser = OptionParser(usage=usage, description=desc, version=("%s %s" % (_NAME, _VERSION)))
+
+    opts = OptionGroup(parser, "filters")
+    opts.add_option("-e", "--email", dest="email", type="string", metavar="EMAIL", help="select entries in queue sent to EMAIL")
+    parser.set_defaults(email=None)
+    opts.add_option("-l", "--size-lower", dest="lowsize", type="int", metavar="SIZE", help="select entries in queue with size smaller than SIZE")
+    parser.set_defaults(lowsize=0)
+    opts.add_option("-u", "--size-upper", dest="upsize", type="int", metavar="SIZE", help="select entries in queue with size upper than SIZE")
+    parser.set_defaults(upsize=0)
+    opts.add_option("-a", "--active", dest="active", default=False, action="store_true", help="select 'active' entries in queue (default: no)")
+    opts.add_option("-o", "--hold", dest="hold", default=False, action="store_true", help="select on 'hold' entries in queue (default: no)")
+    parser.add_option_group(opts)
+
+    (options, args) = parser.parse_args()
+
+    m = mailqueue()
+    m.add_filter("email", options.email)
+    m.add_filter("lowsize", options.lowsize)
+    m.add_filter("upsize", options.upsize)
+    m.add_filter("active", options.active)
+    m.add_filter("hold", options.hold)
+
+    if args == []:
+        m.show()
+    elif args[0] == "show":
+        m.show()
+    elif args[0] == "showcsv":
+        m.showcsv()
+    elif args[0] == "del":
+        m.delete()
+    else:
+        print "%s %s" % (_NAME, _HELP)
+
+
+if __name__ == "__main__":
+    main()
+
