@@ -1,0 +1,19 @@
+pmail - Postfix mail queue manager
+==================================
+
+pmailq : Postfix MAIL Queue manager
+
+see manpage for more informations
+
+Features
+--------
+(see manpage)
+
+Copyright
+---------
+(see AUTHORS file)
+
+Licence
+-------
+pmailq is distributed under WTFPL
+(see COPYING file for complete license)
