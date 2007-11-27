@@ -10,9 +10,10 @@ pmailq B<--help>
 
 =head1 DESCRIPTION
 
-pmailq parse output of B<mailq> command from postfix (ie: I<postqueue -p>) to perform some
-actions on selected entries. The selected entries are filtered by applying filters on criterias
-like email address, error message from smtp server, message size, mail state in queue.
+pmailq parse output of B<mailq> command from postfix (ie: I<postqueue -p>) and permits
+to perform some actions (like removing or displaying in a machine readable format) in
+a bunch of entries in queue, selected by applying patterns on criterias like email
+address, error message from smtp server, message size, mail status in queue.
 
 =head1 COMMANDS
 
@@ -38,11 +39,11 @@ delete (via I<postsuper -d>) selected entries
 
 =item B<-e> I<PATTERN>, B<--email>=I<PATTERN>
 
-select entries in queue with email matching PATTERN
+select entries in queue with email matching PATTERN (PATTERN accepts wildcards)
 
 =item B<-m> I<PATTERN>, B<--msg>=I<PATTERN>
 
-select entries in queue with error message matching PATTERN
+select entries in queue with error message matching PATTERN (PATTERN accepts wildcards)
 
 =item B<-l> I<SIZE>, B<--size-lower>=I<SIZE>
 
