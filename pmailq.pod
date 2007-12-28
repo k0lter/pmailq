@@ -10,8 +10,8 @@ pmailq B<--help>
 
 =head1 DESCRIPTION
 
-pmailq parse output of B<mailq> command from postfix (ie: I<postqueue -p>) and permits
-to perform some actions (like removing or displaying in a machine readable format) in
+pmailq parses output of B<mailq> command from postfix (ie: I<postqueue -p>) and permits
+to perform some actions (like removing or displaying in a machine readable format) on
 a bunch of entries in queue, selected by applying patterns on criterias like email
 address, error message from smtp server, message size, mail status in queue.
 

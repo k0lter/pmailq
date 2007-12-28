@@ -44,17 +44,17 @@ class mailqueue:
     def parse(self):
         
         proc = popen2.Popen3(MAILQ, True)    
-        
+
+        # mail system down ?
         p_ret = proc.wait()
         if p_ret != 0:
-            print "ERROR (%d) !!!:" % p_ret
-            print "".join(proc.childerr.readline())
-            return None
+            sys.stderr.write ("ERR : %s\n" % "".join(proc.childerr.readline()).strip())
+            sys.exit (-1)
 
         # checking empty mail queue
         buffer = proc.fromchild.readlines()
         if len(buffer)>0 and buffer[0].strip() == "Mail queue is empty":
-            print buffer[0].strip()
+            sys.stderr.write ("INFO : %s\n" % buffer[0].strip())
             return None
         
         # skip first and last line
