@@ -1,0 +1,26 @@
+This package was downloaded from http://kolter.openics.org/projects/pmailq/
+
+Files: debian/*
+Copyright: © 2007 Emmanuel Bouthenot <kolter@openics.org>
+License: GPL-2+
+ The Debian packaging information is under the GPL, version 2 or later
+
+Files: pmailq, pmailq.pod
+Copyright: © 2007 Emmanuel Bouthenot <kolter@openics.org>
+License: other-BSD
+              DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                      Version 2, December 2004
+ .
+   Copyright (C) 2004 Sam Hocevar
+    22 rue de Plaisance, 75014 Paris, France
+   Everyone is permitted to copy and distribute verbatim or modified
+   copies of this license document, and changing it is allowed as long
+   as the name is changed.
+ .
+              DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+     TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+ .
+    0. You just DO WHAT THE FUCK YOU WANT TO.
+
+On Debian GNU/Linux systems, the complete text of the GNU General
+Public License version 2 can be found in `/usr/share/common-licenses/GPL-2'

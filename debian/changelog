@@ -1,0 +1,6 @@
+pmailq (0.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #453238)
+
+ -- Emmanuel Bouthenot <kolter@openics.org>  Tue, 27 Nov 2007 19:51:34 +0100
+
