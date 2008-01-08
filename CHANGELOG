@@ -1,0 +1,12 @@
+pmail - Postfix mail queue manager
+==================================
+
+ChangeLog
+
+Version 0.2 (2008-01-08):
+  * Add Changelog
+  * Fix typos in manpage
+  * Fix exit code on errors (http://bugs.debian.org/457299)
+
+Version 0.1 (2007-11-27):
+  * first release
