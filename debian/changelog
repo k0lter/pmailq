@@ -1,3 +1,9 @@
+pmailq (0.3-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Emmanuel Bouthenot <kolter@openics.org>  Thu, 31 Jan 2008 22:41:56 +0100
+
 pmailq (0.2-1) unstable; urgency=low
 
   * New upstream release (Closes: #457299)

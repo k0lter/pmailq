@@ -10,7 +10,7 @@ Vcs-Git: git://git.openics.org/pmailq.git
 
 Package: pmailq
 Architecture: all
-Depends: ${misc:Depends}, python (>= 2.3), postfix
+Depends: python (>= 2.3), postfix
 Description: postfix mail queue manager
  pmailq parses output of mailq command from postfix (postqueue -p)
  and permits to perform some actions (like removing or displaying in
