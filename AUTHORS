@@ -1,4 +1,4 @@
-pmail - Postfix mail queue manager
-==================================
+pmailq - Postfix MAIL Queue manager
+===================================
 
 Main developer : Emmanuel Bouthenot <kolter@openics.org>
