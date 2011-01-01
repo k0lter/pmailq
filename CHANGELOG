@@ -3,10 +3,17 @@ pmailq - Postfix MAIL Queue manager
 
 ChangeLog
 
+Version 0.4 (2010-12-29):
+    * Replace the usage of the deprecated popen2.Popen3() with
+      subprocess.Popen().
+
+Version 0.3 (2010-01-31):
+    * Fix dead lock while processing a large amount of datas in mail queue
+
 Version 0.2 (2008-01-08):
-  * Add Changelog
-  * Fix typos in manpage
-  * Fix exit code on errors (http://bugs.debian.org/457299)
+    * Add Changelog
+    * Fix typos in manpage
+    * Fix exit code on errors (http://bugs.debian.org/457299)
 
 Version 0.1 (2007-11-27):
-  * first release
+    * First release

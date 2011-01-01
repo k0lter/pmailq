@@ -20,28 +20,28 @@ DELQ = "postsuper -d"
 
 
 from optparse import OptionParser, OptionGroup # needs python >= 2.3
-import sys, os, popen2, fcntl, select, fnmatch
+import sys, os, subprocess, fcntl, select, fnmatch
 
 class Proc:
-    
+
     def run(self, command):
-        child = popen2.Popen3(command, 1)
-        child.tochild.close()             
-        outfile = child.fromchild
+        proc = subprocess.Popen(command, bufsize=1, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+        proc.stdin.close()
+        outfile = proc.stdout
         outfd = outfile.fileno()
-        errfile = child.childerr
+        errfile = proc.stderr
         errfd = errfile.fileno()
 
         # avoid deadlocks
         self.set_no_block(outfd)
         self.set_no_block(errfd)
-        
+
         outdata = errdata = ''
         outeof = erreof = False
 
         while True:
             # wait for activity
-            ready = select.select([outfd,errfd],[],[])
+            ready = select.select([outfd, errfd], [], [])
             if outfd in ready[0]:
                 outchunk = outfile.read()
                 if outchunk == '':
@@ -56,9 +56,9 @@ class Proc:
                 break
             # give a little time for buffers to fill
             select.select([],[],[],.1)
-        
-        err = child.wait()
-        
+
+        err = proc.wait()
+
         return err, outdata, errdata
 
     def set_no_block(self, fd):
