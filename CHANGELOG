@@ -6,6 +6,7 @@ ChangeLog
 Version 0.4 (2010-12-29):
     * Replace the usage of the deprecated popen2.Popen3() with
       subprocess.Popen().
+    * Fix some errors and do some cleanup in manpage.
 
 Version 0.3 (2010-01-31):
     * Fix dead lock while processing a large amount of datas in mail queue
