@@ -3,6 +3,9 @@ pmailq - Postfix MAIL Queue manager
 
 ChangeLog
 
+Version 0.5 (2011-01-05):
+    * Some rewording in manpage.
+
 Version 0.4 (2010-12-29):
     * Replace the usage of the deprecated popen2.Popen3() with
       subprocess.Popen().

@@ -10,11 +10,11 @@ pmailq B<--help>
 
 =head1 DESCRIPTION
 
-pmailq parses output of B<mailq> command from postfix (ie: I<postqueue -p>). It
-permits to perform some actions (like removing or displaying in a machine
-readable format) on a group of entries in queue. They are selected by applying
-filters on criterias like email address, error message from SMTP server, message
-size, mail status in queue.
+pmailq parses the output of B<mailq> command from postfix (ie: I<postqueue -p>).
+It permits to perform some actions on a group of entries in queue (like removing
+or displaying them in a machine readable format). They are selected by applying
+filters (wildcards are allowed) on criterias like email address, error message
+from SMTP server, message size, mail status in queue.
 
 =head1 COMMANDS
 
@@ -32,7 +32,7 @@ Show a listing of the selected entries in a machine readable format.
 
 =item B<del>
 
-Delete (via I<postsuper -d>) selected entries.
+Delete (via I<postsuper -d>) the selected entries.
 
 =back
 
@@ -84,6 +84,7 @@ Example 1: display all the entries in queue sent to an email address matching
 format:
 
  # pmailq -u 3000 -l 3200 -e "*@example.com" parse
+
  7E75214643A4|Fri Aug 31|3154|1|0|edgar@example.com
  B0BDE146B640|Thu Aug 30|3199|1|0|paul@example.com
  B587E146B675|Wed Aug 29|3065|0|0|paul@example.com
@@ -95,6 +96,7 @@ format:
 Example 2: remove all mails in queue not sent because of a connection time out:
 
  # pmailq -m "*connection*timed*out" del
+
  deleting 00CF514616D3 [OK]
  deleting 12D911461924 [OK]
  deleting 269EF1461CA9 [OK]
