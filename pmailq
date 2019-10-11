@@ -12,7 +12,7 @@
 _NAME = 'pmailq'
 _HELP = "[OPTIONS] [ list | parse | del ]"
 _DESC = "%s postfix mail queue manager" % _NAME
-_VERSION = '0.3'
+_VERSION = '0.6'
 _AUTHOR = 'Emmanuel Bouthenot <kolter@openics.org>'
 
 MAILQ = "postqueue -p"
