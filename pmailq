@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # This program is free software. It comes without any warranty, to
@@ -36,7 +36,7 @@ class Proc:
         self.set_no_block(outfd)
         self.set_no_block(errfd)
 
-        outdata = errdata = ''
+        outdata = errdata = bytes()
         outeof = erreof = False
 
         while True:
@@ -44,12 +44,12 @@ class Proc:
             ready = select.select([outfd, errfd], [], [])
             if outfd in ready[0]:
                 outchunk = outfile.read()
-                if outchunk == '':
+                if outchunk == b'':
                     outeof = True
                 outdata = outdata + outchunk
             if errfd in ready[0]:
                 errchunk = errfile.read()
-                if errchunk == '':
+                if errchunk == b'':
                     erreof = True
                 errdata = errdata + errchunk
             if outeof and erreof:
@@ -59,7 +59,7 @@ class Proc:
 
         err = proc.wait()
 
-        return err, outdata, errdata
+        return err, outdata.decode('utf-8'), errdata.decode('utf-8')
 
     def set_no_block(self, fd):
         fl = fcntl.fcntl(fd, fcntl.F_GETFL)
@@ -184,7 +184,7 @@ class Mailqueue:
                 out += "    + %s : [%s]\n" % (",".join(n['dest']), n['info'])
 
             if self.check(m['size'], m['active'], m['hold'], to, i):
-                print out
+                print(out)
 
         
     def cmd_parse(self):
@@ -197,7 +197,7 @@ class Mailqueue:
                     e.append(o)
                 
                 if self.check(m['size'], m['active'], m['hold'], e, i):
-                    print "%s|%s|%s|%d|%d|%s" % (m['id'], m['date'], m['size'], int(m['active']), int(m['hold']),  ",".join(n['dest']))
+                    print("%s|%s|%s|%d|%d|%s" % (m['id'], m['date'], m['size'], int(m['active']), int(m['hold']),  ",".join(n['dest'])))
 
 
     def cmd_del(self):
@@ -212,9 +212,9 @@ class Mailqueue:
                     proc = popen2.Popen3("%s %s" % (DELQ, m['id']), True)
                     p_ret = proc.wait()
                     if p_ret != 0:
-                        print "deleting %s [FAILED] (%s)" % (m['id'], "".join(proc.childerr.readlines()).strip())
+                        print("deleting %s [FAILED] (%s)" % (m['id'], "".join(proc.childerr.readlines()).strip()))
                     else:
-                        print "deleting %s [OK]" % m['id']
+                        print("deleting %s [OK]" % m['id'])
 
 def main():
     usage = "%prog " + _HELP
@@ -253,7 +253,7 @@ def main():
     elif args[0] == "del":
         m.cmd_del()
     else:
-        print "%s %s" % (_NAME, _HELP)
+        print("%s %s" % (_NAME, _HELP))
 
 
 if __name__ == "__main__":
