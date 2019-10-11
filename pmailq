@@ -27,6 +27,7 @@ import fcntl
 import select
 import fnmatch
 import argparse
+import re
 
 # }}}
 
@@ -74,7 +75,7 @@ class Proc:
         fl = fcntl.fcntl(fd, fcntl.F_GETFL)
         try:
             fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NDELAY)
-        except AttributeError:            
+        except AttributeError:
             fcntl.fcntl(fd, fcntl.F_SETFL, fl | fcntl.FNDELAY)
 # }}}
 
@@ -107,7 +108,7 @@ class MailQueue:
             sys.exit (-1)
 
         buffer = p_stdout.strip().split('\n');
-        # checking empty mail queue        
+        # checking empty mail queue
         if len(buffer)>0 and buffer[0].strip() == "Mail queue is empty":
             sys.stderr.write ("INFO : %s\n" % buffer[0].strip())
             return None
@@ -135,7 +136,7 @@ class MailQueue:
                     if dest != []:
                         queue.append({ "info" : info , "dest" : dest })
                         dest = []
-                        info = expl[1:len(expl)-1]                
+                        info = expl[1:len(expl)-1]
                 else:
                     dest.append(expl.lower())
 
@@ -181,7 +182,7 @@ class MailQueue:
 
     def cmd_list(self):
         for m in self.mailqueue:
-            out = "%s\n" % m['id'] 
+            out = "%s\n" % m['id']
             out += "  -date: %s\n" % m['date']
             out += "  -size: %s\n" % m['size']
             out += "  -active: %s\n" % str(m['active'])
@@ -220,10 +221,9 @@ class MailQueue:
                 for o in n['dest']:
                     e.append(o)
                 if self.check(m['size'], m['active'], m['hold'], e, i):
-                    proc = popen2.Popen3("%s %s" % (DELQ, m['id']), True)
-                    p_ret = proc.wait()
+                    p_ret, _, p_stderr = Proc().run('%s %s' % (DELQ, m['id']))
                     if p_ret != 0:
-                        print("deleting %s [FAILED] (%s)" % (m['id'], "".join(proc.childerr.readlines()).strip()))
+                        print("deleting %s [FAILED] (%s)" % (m['id'], re.sub('\s+', ' ', p_stderr).strip()))
                     else:
                         print("deleting %s [OK]" % m['id'])
 # }}}
