@@ -26,8 +26,8 @@ import subprocess
 import fcntl
 import select
 import fnmatch
+import argparse
 
-from argparse import OptionParser, OptionGroup # needs python >= 2.3
 # }}}
 
 # {{{ Class Proc
@@ -230,24 +230,48 @@ class MailQueue:
 
 # {{{ main
 def main():
-    usage = "%prog " + _HELP
-    desc = _DESC
-    parser = OptionParser(usage=usage, description=desc, version=("%s %s" % (_NAME, _VERSION)))
+    parser = argparse.ArgumentParser(prog=_NAME, description=_DESC)
+    parser.add_argument(
+        '-v', '--version',
+        action='version', version=_VERSION)
+    parser.add_argument(
+        '-e', '--email',
+        dest='email', default=None, metavar='PATTERN',
+        help='select entries in queue with email matching PATTERN')
+    parser.add_argument(
+        '-m', '--msg',
+        dest='msg', default=None, metavar='PATTERN',
+        help='select entries in queue with error message matching PATTERN')
+    parser.add_argument(
+        '-l', '--size-lower',
+        dest='lowsize', default=0, type=int, metavar='SIZE',
+        help='select entries in queue with size lower than SIZE bytes')
+    parser.add_argument(
+        '-u', '--size-upper',
+        dest='upsize', default=0, type=int, metavar='SIZE',
+        help='select entries in queue with size upper than SIZE bytes')
+    parser.add_argument(
+        '-a', '--active',
+        dest='active', default=False, action='store_true',
+        help='select "active" entries in queue (default: no)')
+    parser.add_argument(
+        '-o', '--hold',
+        dest='hold', default=False, action='store_true',
+        help='select "on hold" entries in queue (default: no)')
+    subparsers = parser.add_subparsers(dest='action')
+    subparsers.add_parser(
+        'list',
+        help='Show a detailed listing of the selected entries')
+    subparsers.add_parser(
+        'parse',
+        help='Show a listing of the selected entries in a machine readable format')
+    subparsers.add_parser(
+        'del',
+        help='Delete the selected entries')
+    options = parser.parse_args()
 
-    opts = OptionGroup(parser, "filters")
-    opts.add_option("-e", "--email", dest="email", type="string", metavar="PATTERN", help="select entries in queue with email matching PATTERN")
-    parser.set_defaults(email=None)
-    opts.add_option("-m", "--msg", dest="msg", type="string", metavar="PATTERN", help="select entries in queue with error message matching PATTERN")
-    parser.set_defaults(msg=None)
-    opts.add_option("-l", "--size-lower", dest="lowsize", type="int", metavar="SIZE", help="select entries in queue with size lower than SIZE bytes")
-    parser.set_defaults(lowsize=0)
-    opts.add_option("-u", "--size-upper", dest="upsize", type="int", metavar="SIZE", help="select entries in queue with size upper than SIZE bytes")
-    parser.set_defaults(upsize=0)
-    opts.add_option("-a", "--active", dest="active", default=False, action="store_true", help="select 'active' entries in queue (default: no)")
-    opts.add_option("-o", "--hold", dest="hold", default=False, action="store_true", help="select 'on hold' entries in queue (default: no)")
-    parser.add_option_group(opts)
-
-    (options, args) = parser.parse_args()
+    if options.action is None:
+        options.action = 'list'
 
     m = MailQueue()
     m.add_filter("email", options.email)
@@ -257,16 +281,10 @@ def main():
     m.add_filter("active", options.active)
     m.add_filter("hold", options.hold)
 
-    if args == []:
-        m.cmd_list()
-    elif args[0] == "list":
-        m.cmd_list()
-    elif args[0] == "parse":
-        m.cmd_parse()
-    elif args[0] == "del":
-        m.cmd_del()
+    if 'cmd_' + options.action not in dir(m):
+        parser.print_help()
     else:
-        print("%s %s" % (_NAME, _HELP))
+        getattr(m, 'cmd_' + options.action)()
 
 if __name__ == "__main__":
     main()
