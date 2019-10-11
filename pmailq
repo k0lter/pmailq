@@ -8,20 +8,29 @@
 # http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
+# {{{ Constants
 _NAME = 'pmailq'
 _HELP = "[OPTIONS] [ list | parse | del ]"
 _DESC = "%s postfix mail queue manager" % _NAME
 _VERSION = '0.3'
 _AUTHOR = 'Emmanuel Bouthenot <kolter@openics.org>'
 
-
 MAILQ = "postqueue -p"
 DELQ = "postsuper -d"
+# }}}
 
+# {{{ Imports
+import sys
+import os
+import subprocess
+import fcntl
+import select
+import fnmatch
 
-from optparse import OptionParser, OptionGroup # needs python >= 2.3
-import sys, os, subprocess, fcntl, select, fnmatch
+from argparse import OptionParser, OptionGroup # needs python >= 2.3
+# }}}
 
+# {{{ Class Proc
 class Proc:
 
     def run(self, command):
@@ -67,8 +76,10 @@ class Proc:
             fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NDELAY)
         except AttributeError:            
             fcntl.fcntl(fd, fcntl.F_SETFL, fl | fcntl.FNDELAY)
+# }}}
 
-class Mailqueue:
+# {{{ MailQueue
+class MailQueue:
 
     def __init__(self):
         self.mailqueue = []
@@ -85,22 +96,22 @@ class Mailqueue:
 
     def add_filter(self, key, value):
         self.filters[key] = value
-    
+
 
     def parse(self):
         p_ret, p_stdout, p_stderr = Proc().run(MAILQ)
-        
+
         # mail system down ?
         if p_ret != 0:
             sys.stderr.write ("ERR : %s\n" % ", ".join(p_stderr.strip().split("\n")))
             sys.exit (-1)
-        
+
         buffer = p_stdout.strip().split('\n');
         # checking empty mail queue        
         if len(buffer)>0 and buffer[0].strip() == "Mail queue is empty":
             sys.stderr.write ("INFO : %s\n" % buffer[0].strip())
             return None
-        
+
         # skip first and last line
         buffer = "\n".join(buffer[1:-1]).strip()
         for block in buffer.split("\n\n"):
@@ -110,17 +121,17 @@ class Mailqueue:
             # squeeze repeated spaces
             while '' in headers:
                 headers.remove('')
-        
+
             queue = []
             dest = []
             info = ""
             for expl in lines[1:]:
                 expl = expl.strip()
-        
+
                 if expl.startswith("(") and expl.endswith(")"):
                     if info == "":
                         info = expl[1:len(expl)-1]
-            
+
                     if dest != []:
                         queue.append({ "info" : info , "dest" : dest })
                         dest = []
@@ -130,7 +141,7 @@ class Mailqueue:
 
             if dest != []:
                 queue.append({ "info" : info , "dest" : dest })
-        
+
             self.mailqueue.append({
                 "id" : headers[0].rstrip("*!"),
                 "active" : headers[0].endswith("*"),
@@ -186,7 +197,7 @@ class Mailqueue:
             if self.check(m['size'], m['active'], m['hold'], to, i):
                 print(out)
 
-        
+
     def cmd_parse(self):
         for m in self.mailqueue:
             e = []
@@ -195,7 +206,7 @@ class Mailqueue:
                 i.append(n['info'])
                 for o in n['dest']:
                     e.append(o)
-                
+
                 if self.check(m['size'], m['active'], m['hold'], e, i):
                     print("%s|%s|%s|%d|%d|%s" % (m['id'], m['date'], m['size'], int(m['active']), int(m['hold']),  ",".join(n['dest'])))
 
@@ -215,7 +226,9 @@ class Mailqueue:
                         print("deleting %s [FAILED] (%s)" % (m['id'], "".join(proc.childerr.readlines()).strip()))
                     else:
                         print("deleting %s [OK]" % m['id'])
+# }}}
 
+# {{{ main
 def main():
     usage = "%prog " + _HELP
     desc = _DESC
@@ -236,7 +249,7 @@ def main():
 
     (options, args) = parser.parse_args()
 
-    m = Mailqueue()
+    m = MailQueue()
     m.add_filter("email", options.email)
     m.add_filter("msg", options.msg)
     m.add_filter("lowsize", options.lowsize)
@@ -255,7 +268,8 @@ def main():
     else:
         print("%s %s" % (_NAME, _HELP))
 
-
 if __name__ == "__main__":
     main()
+# }}}
 
+# vim: foldmethod=marker foldlevel=0 foldenable
