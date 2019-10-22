@@ -24,10 +24,10 @@ Select entries in queue with email matching PATTERN (wildcards allowed).
 
 **-m PATTERN, --msg=PATTERN**
 Select entries in queue with error message matching PATTERN (wildcards allowed).
-  
+
 **-l SIZE, --size-lower=SIZE**
 Select entries in queue with size lower than SIZE bytes.
-  
+
 **-u SIZE, --size-upper=SIZE**
 Select entries in queue with size upper than SIZE bytes.
 
@@ -36,10 +36,10 @@ Select "active" entries in queue.
 
 **-o**
 Select "on hold" entries in queue.
- 
+
  **--version**
  Show program's version number and exit
-  
+
 **-h, --help**
 Show help message and exit
 

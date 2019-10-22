@@ -1,6 +1,6 @@
 =head1 NAME
 
-pmailq - Postfix MAIL Queue manager
+pmailq - Postfix Mail Queue manager
 
 =head1 SYNOPSIS
 
@@ -10,11 +10,9 @@ pmailq B<--help>
 
 =head1 DESCRIPTION
 
-pmailq parses the output of B<mailq> command from postfix (ie: I<postqueue -p>).
-It permits to perform some actions on a group of entries in queue (like removing
-or displaying them in a machine readable format). They are selected by applying
-filters (wildcards are allowed) on criterias like email address, error message
-from SMTP server, message size, mail status in queue.
+pmailq processes the output of the Postfix mailq command, and can list, parse (machine-readably), or delete queued messages in batches.
+
+They can be selected by size, by queue status, and by pattern matching (with wildcards) on recipient addresses and server error messages.
 
 =head1 COMMANDS
 
@@ -24,7 +22,7 @@ Action to perform on selected entries.
 
 =item B<list> (default command)
 
-Show a detailed listing of the selected entries.
+Show (via I<postqueue -p>) a detailed listing of the selected entries.
 
 =item B<parse>
 
